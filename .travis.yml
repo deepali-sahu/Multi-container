@@ -1,0 +1,20 @@
+sudo: required
+services:
+  - docker
+before_install:
+  - docker build -t deepali123/react-test -f ./client/Dockerfile.dev ./client
+script:
+  - docker run deepali123/react-test npm test -- --coverage
+
+after_success:
+  - docker build -t deepali123/multi-client ./client
+  - docker build -t deepali123/multi-nginx ./nginx
+  - docker build -t deepali123/multi-server ./server
+  - docker build -t deepali123/multi-worker ./worker  
+# LOgin to the docker CLI
+  - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_ID" --password-stdin
+# Thake those images and push them to docker heroku_collaborator
+  - docker push deepali123/multi-client
+  - docker push deepali123/multi-nginx
+  - docker push deepali123/multi-server
+  - docker push deepali123/multi-worker
